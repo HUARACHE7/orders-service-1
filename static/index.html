@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Viewer (Wildberries L0)</title>
+    <style>body { font-family: monospace; padding: 20px; }</style>
+</head>
+<body>
+    <h2>Order Lookup by UID</h2>
+    <input type="text" id="orderId" placeholder="Enter Order UID (e.g., d541b559-6019-482a-a034-...)">
+    <button id="searchButton">Search</button>
+    <hr>
+    <h3>Result:</h3>
+    <pre id="result">Waiting for input...</pre>
+
+    <script>
+        document.getElementById('searchButton').addEventListener('click', () => {
+            const orderId = document.getElementById('orderId').value.trim();
+            const resultEl = document.getElementById('result');
+
+            if (!orderId) {
+                resultEl.textContent = 'Please enter an Order UID.';
+                return;
+            }
+            
+            resultEl.textContent = 'Searching...';
+
+            fetch(`/order?id=${orderId}`)
+                .then(response => {
+                    if (response.status === 404) {
+                        return { error: `Order ID ${orderId} not found in cache.` };
+                    }
+                    if (!response.ok) {
+                        return { error: `Server error: ${response.status}` };
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    resultEl.textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(err => {
+                    resultEl.textContent = `Fetch error: ${err}`;
+                });
+        });
+    </script>
+</body>
+</html>

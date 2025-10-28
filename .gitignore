@@ -1,0 +1,13 @@
+orders-service
+orders-service.exe # Если собираете под Windows
+
+postgres-data/
+
+orders-service-1-1/
+orders-service-1/
+
+*.o
+*.exe
+/bin
+/vendor
+/pkg

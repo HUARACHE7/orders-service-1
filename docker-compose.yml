@@ -1,0 +1,43 @@
+services:
+  postgres:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: wb_user
+      POSTGRES_PASSWORD: wb_pass
+      POSTGRES_DB: orders_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+
+  nats-streaming:
+    image: nats-streaming:0.24.6-alpine 
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command:
+      - "-p"
+      - "4222"
+      - "-m"
+      - "8222"
+      - "-cid"
+      - "test-cluster"
+
+  test:
+    build: 
+      context: .
+      target: builder
+    
+    command: ["go", "test", "-v", "./..."]
+    
+    depends_on:
+      - postgres
+      - nats-streaming
+      
+    environment:
+      DB_HOST: "postgres" 
+      DB_NAME: "orders_db"
+    
+    volumes: 
+      - .:/app
